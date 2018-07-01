@@ -1,1 +1,2 @@
 # bashmyshell
+A lofty attempt to recreate some linux utility programs on my own. Effectively my own recreation of coreutils. The executable names and functionality will likely match, but my intention is to avoid influences from coreutils when it comes to implemention.
