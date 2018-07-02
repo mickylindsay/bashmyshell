@@ -16,26 +16,17 @@ CFLAGS := -g -Wall -Werror
 LIB := 
 INC := -I $(INCLUDEDIR)
 
-#Executables to be built
-
-
-### NOT TO BE USED WITH BASE64 ENCODE in ./configure
-TARGETS := bin/test bin/yes bin/xargs
-
-test_OBJECTS := build/test.o
-yes_OBJECTS := build/yes.o
-xargs_OBJECTS := build/xargs.o
-
 ###
 
+.PRECIOUS: $(BUILDDIR)/%.$(OBJEXT)
 
 #Builds all targets
 all: $(TARGETS)
 
+
 #Compiles individual object files
 $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@echo "Compiling $<"
-	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(shell dirname "$@")
 	@$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
@@ -45,11 +36,11 @@ $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 $(TARGETDIR)/%: $$($$*_OBJECTS)
 	@echo "Linking $@"
 	@mkdir -p $(shell dirname "$@")
-	$(CC) $^ -o $@ $(LIB)
+	@$(CC) $^ -o $@ $(LIB)
 
 #Clears out the target and building directories
 clean:
 	@echo Removing generated files
 	@rm -r $(BUILDDIR) $(TARGETDIR)
 
-.PHONY: clean
+.PHONY:
