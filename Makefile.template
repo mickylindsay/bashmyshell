@@ -17,7 +17,17 @@ LIB :=
 INC := -I $(INCLUDEDIR)
 
 #Executables to be built
+
+
+### NOT TO BE USED WITH BASE64 ENCODE in ./configure
 TARGETS := bin/test bin/yes bin/xargs
+
+test_OBJECTS := build/test.o
+yes_OBJECTS := build/yes.o
+xargs_OBJECTS := build/xargs.o
+
+###
+
 
 #Builds all targets
 all: $(TARGETS)
@@ -25,28 +35,21 @@ all: $(TARGETS)
 #Compiles individual object files
 $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@echo "Compiling $<"
+	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(shell dirname "$@")
 	@$(CC) $(CFLAGS) $(INC) -c -o $@ $<
+
+#Uses second expansion to add the object file dependencies to the target rule
+#Downside: no two targets can have same name regardless of target directory
+.SECONDEXPANSION:
+$(TARGETDIR)/%: $$($$*_OBJECTS)
+	@echo "Linking $@"
+	@mkdir -p $(shell dirname "$@")
+	$(CC) $^ -o $@ $(LIB)
 
 #Clears out the target and building directories
 clean:
 	@echo Removing generated files
-	@rm $(BUILDDIR)/* $(TARGETDIR)/*
+	@rm -r $(BUILDDIR) $(TARGETDIR)
 
 .PHONY: clean
-
-#Build rules for each individual executable
-#Should probably find a better solution or automate the addition of each
-test_OBJECTS := build/test.o
-$(TARGETDIR)/test: $(test_OBJECTS)
-	@echo "Linking $@"
-	@$(CC) $^ -o $@ $(LIB)
-
-yes_OBJECTS := build/yes.o
-$(TARGETDIR)/yes: $(yes_OBJECTS)
-	@echo "Linking $@"
-	@$(CC) $^ -o $@ $(LIB)
-
-xargs_OBJECTS := build/xargs.o
-$(TARGETDIR)/xargs: $(xargs_OBJECTS)
-	@echo "Linking $@"
-	@$(CC) $^ -o $@ $(LIB)
