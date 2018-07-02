@@ -14,6 +14,8 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
       I=`expr index "$line" ":"`
       T="${line:0:I-1}"
       D='$(BUILDDIR)/'"${line:I}"
+      D="$(echo $D | sed 's/ / \$(BUILDDIR)\//g')"
+      echo $D
       
       TARGETS="${TARGETS}"'$(TARGETDIR)/'"${T} "
       OBJDEP="${OBJDEP}${T}_OBJECTS := ${D}"$'\n'
