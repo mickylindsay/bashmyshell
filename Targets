@@ -1,3 +1,4 @@
 test:test.o
 yes:yes.o
 xargs:xargs.o
+clear:clear.o
