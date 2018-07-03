@@ -1,10 +1,11 @@
 /*
-Executes the command passed as commandline arguments with the data recieved
-via stdin/pipe.
+xargs
+Executes the provided command and passes the input stream as the commandline arguments.
 
-TODO:
-  Write a better split_line.
-  Write a char** append function.
+AUTHOR: Micky Lindsay
+CREATED: 7/2/2018
+VERSION: 0.1
+
  */
 
 #include <stdio.h>
@@ -15,30 +16,19 @@ TODO:
 #include <sys/wait.h>
 
 /*
-Splits the given line by spaces and places them into args.
-arg_size is the number of splits
+Returns an array of pointers to space seperated strings
+Originally borrowed from a function I wrote in university,
+but it was garbage so I made a version im actually proud of
+check the git history to see
 */
-int split_line(const char* line, char **args, int *arg_size){
-  int end = 0;
-  int start = 0;
-  int length = strlen(line);
-  char c;
-  *arg_size = 0;
-  do{
-    c = line[end++];
-    if(c == ' ' || end >= length){
-      int tmp_len = end - start;
-      if(c == ' '){
-	    tmp_len--;
-      }
-      args[*arg_size] = (char *) malloc(sizeof(char) * tmp_len + 1);
-      memcpy(args[*arg_size], (line + start), tmp_len);
-      args[*arg_size][tmp_len] = '\0';
-      start = end;
-      (*arg_size)++;
-    }
-  } while(end < length);
-  return 0;
+void split_line(const char *line, char **args, int *size){
+  char *ptr = (char *)line;
+  *size = 0;
+  args[(*size)++] = ptr;
+  while(*(++ptr))
+    if((*ptr) == '_')
+      args[(*size)++] = ptr;
+  args[*size] = NULL;
 }
 
 int main(int argc, char **argv){
@@ -63,8 +53,7 @@ int main(int argc, char **argv){
   }
   
   while(num_args >= 0){
-    args[num_args] = (char *) calloc(strlen(argv[num_args + pass_args]) + 1, sizeof(char));
-    strcpy(args[num_args], argv[num_args + pass_args]);
+    args[num_args] = argv[num_args + pass_args];
     num_args--;
   }
   pid_t pid = fork();	 
@@ -74,9 +63,6 @@ int main(int argc, char **argv){
   }else{
     wait(NULL);
   }
-  char **ptr = args;
-  while(*ptr)
-    free(*(ptr++));
   free(args);
     
   free(buffer);
