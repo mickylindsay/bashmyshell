@@ -21,13 +21,17 @@ Originally borrowed from a function I wrote in university,
 but it was garbage so I made a version im actually proud of
 check the git history to see
 */
-void split_line(const char *line, char **args, int *size){
+void split_line(char *line, char **args, int *size){
   char *ptr = (char *)line;
   *size = 0;
   args[(*size)++] = ptr;
-  while(*(++ptr))
-    if((*ptr) == '_')
-      args[(*size)++] = ptr;
+  while(*(++ptr)){
+    if((*ptr) == ' '){
+      args[(*size)++] = ++ptr;
+      *(ptr - 1) = '\0';
+    }
+  }
+  *(ptr - 1) = '\0';
   args[*size] = NULL;
 }
 
