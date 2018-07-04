@@ -4,7 +4,6 @@ Word count programming for the number of lines, bytes, characters, words, and th
  */
 
 //TODO: Total when multiple files input
-//TODO: stdin until EOF key
 //TODO: usage and help printing
 //TODO: Comment this stuff
 
@@ -58,7 +57,8 @@ static void print_counter(struct counter * const c){
     if(IS_SET(cur_mode, (0x01 << i)))
       printf("\t%d", *(ptr+i));
   }
-  printf("\t%s\n", c->name);
+  if(c->name)
+    printf("\t%s\n", c->name);
 }
 
 static int count_words(const char * c){
@@ -67,6 +67,8 @@ static int count_words(const char * c){
   while(*(ptr++))
     if(*ptr == ' ' && *(ptr - 1) != ' ')
       count++;
+  if(ptr > c)
+    count++;
   return count;
   
 }
@@ -97,11 +99,12 @@ static void free_stream(void *data){
 int main(int argc, char **argv){
   list_t *list;
   int i;
-  cur_mode = STDI;
- 
+  cur_mode = STDI | LINE | WORD | CHAR;
+	list_create(&list, &free_stream);
   for(i = 1; i < argc; i++){
     if(argv[i][0] == '-'){
       char c = argv[i][1];
+      cur_mode = STDI;
       switch(c){
       case 'c':
 	cur_mode |= BYTE;
@@ -147,7 +150,6 @@ int main(int argc, char **argv){
       if(in){
 	if(IS_SET(cur_mode,  STDI)){
 	  cur_mode &= ~STDI;
-	  list_create(&list, &free_stream);
 	}
 	struct counter *new_counter = (struct counter *) calloc(1, sizeof(struct counter));
 	new_counter->stream = in;
@@ -155,6 +157,11 @@ int main(int argc, char **argv){
 	list_append(list, new_counter);
       }
     }
+  }
+  if(!list_size(list) && IS_SET(cur_mode, STDI)){
+    struct counter *new_counter = (struct counter *) calloc(1, sizeof(struct counter));
+    new_counter->stream = stdin;
+    list_append(list, new_counter);
   }
   list_foreach(list, &wc_counter);
   list_destroy(list);
