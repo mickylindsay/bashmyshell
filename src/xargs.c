@@ -15,6 +15,17 @@ VERSION: 0.1
 
 #include <sys/wait.h>
 
+#define WHITE_SPACE " \n\r\f\v"
+
+/*
+Returns 1 if the character c is in the string str, 0 otherwise
+ */
+int char_in(char c, const char *str){
+  char *ptr = (char *) str;
+  while(*ptr && *(ptr++) != c);
+  return *ptr ? 1 : 0;
+}
+
 /*
 Returns an array of pointers to space seperated strings
 Originally borrowed from a function I wrote in university,
@@ -26,12 +37,16 @@ void split_line(char *line, char **args, int *size){
   *size = 0;
   args[(*size)++] = ptr;
   while(*(++ptr)){
-    if((*ptr) == ' '){
+    if(char_in(*ptr, WHITE_SPACE)){
+      if(!*(ptr + 1)){
+	break;
+      }
       args[(*size)++] = ++ptr;
       *(ptr - 1) = '\0';
     }
   }
-  *(ptr - 1) = '\0';
+  
+  *(ptr) = '\0';
   args[*size] = NULL;
 }
 
@@ -49,17 +64,15 @@ int main(int argc, char **argv){
   char **args = (char **) calloc(64, sizeof(char *));
   int c = 0;
   split_line(total, args, &c);
-  int num_args = c + argc - 1;
-  int pass_args = argc - 1;
-  while(num_args >= pass_args){
-    args[num_args] = args[num_args - pass_args];
-    num_args--;
+  char **ptr = args + c;
+  while(ptr >= args){
+    *(ptr+argc-1) = *(ptr);
+    ptr--;
   }
-  
-  while(num_args >= 0){
-    args[num_args] = argv[num_args + pass_args];
-    num_args--;
-  }
+  ptr = argv + 1;
+  while(*ptr)
+    *(args++) = *(ptr++);
+  args -= (argc-1);
   pid_t pid = fork();	 
   if(pid == -1){
   }else if(!pid){
