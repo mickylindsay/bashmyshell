@@ -1,10 +1,11 @@
 /*
-Executes the command passed as commandline arguments with the data recieved
-via stdin/pipe.
+xargs
+Executes the provided command and passes the input stream as the commandline arguments.
 
-TODO:
-  Write a better split_line.
-  Write a char** append function.
+AUTHOR: Micky Lindsay
+CREATED: 7/2/2018
+VERSION: 0.1
+
  */
 
 #include <stdio.h>
@@ -14,31 +15,42 @@ TODO:
 
 #include <sys/wait.h>
 
+#define WHITE_SPACE " \n\r\f\v"
+
 /*
-Splits the given line by spaces and places them into args.
-arg_size is the number of splits
+Returns 1 if the character c is in the string str, 0 otherwise
+ */
+int char_in(char c, const char *str){
+  char *ptr = (char *) str;
+  while(*ptr && *(ptr++) != c);
+  return *ptr ? 1 : 0;
+}
+
+/*
+Returns an array of pointers to space seperated strings
+Originally borrowed from a function I wrote in university,
+but it was garbage so I made a version im actually proud of
+check the git history to see
 */
-int split_line(const char* line, char **args, int *arg_size){
-  int end = 0;
-  int start = 0;
-  int length = strlen(line);
-  char c;
-  *arg_size = 0;
-  do{
-    c = line[end++];
-    if(c == ' ' || end >= length){
-      int tmp_len = end - start;
-      if(c == ' '){
-	    tmp_len--;
+void split_line(char *line, char **args, int *size){
+  char *ptr = (char *)line;
+  *size = 0;
+  while(char_in(*(++ptr), WHITE_SPACE));
+  args[(*size)++] = ptr;
+  while(*(++ptr)){
+    if(char_in(*ptr, WHITE_SPACE)){
+      *ptr = '\0';
+      while(char_in(*(++ptr), WHITE_SPACE));
+      if(!*(ptr + 1)){
+        break; 
       }
-      args[*arg_size] = (char *) malloc(sizeof(char) * tmp_len + 1);
-      memcpy(args[*arg_size], (line + start), tmp_len);
-      args[*arg_size][tmp_len] = '\0';
-      start = end;
-      (*arg_size)++;
+      args[(*size)++] = ptr;
+      *(ptr - 1) = '\0';
     }
-  } while(end < length);
-  return 0;
+  }
+  
+  *(ptr) = '\0';
+  args[*size] = NULL;
 }
 
 int main(int argc, char **argv){
@@ -55,18 +67,15 @@ int main(int argc, char **argv){
   char **args = (char **) calloc(64, sizeof(char *));
   int c = 0;
   split_line(total, args, &c);
-  int num_args = c + argc - 1;
-  int pass_args = argc - 1;
-  while(num_args >= pass_args){
-    args[num_args] = args[num_args - pass_args];
-    num_args--;
+  char **ptr = args + c;
+  while(ptr >= args){
+    *(ptr+argc-1) = *(ptr);
+    ptr--;
   }
-  
-  while(num_args >= 0){
-    args[num_args] = (char *) calloc(strlen(argv[num_args + pass_args]) + 1, sizeof(char));
-    strcpy(args[num_args], argv[num_args + pass_args]);
-    num_args--;
-  }
+  ptr = argv + 1;
+  while(*ptr)
+    *(args++) = *(ptr++);
+  args -= (argc-1);
   pid_t pid = fork();	 
   if(pid == -1){
   }else if(!pid){
@@ -74,9 +83,6 @@ int main(int argc, char **argv){
   }else{
     wait(NULL);
   }
-  char **ptr = args;
-  while(*ptr)
-    free(*(ptr++));
   free(args);
     
   free(buffer);
