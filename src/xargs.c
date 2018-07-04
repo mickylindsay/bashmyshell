@@ -35,13 +35,16 @@ check the git history to see
 void split_line(char *line, char **args, int *size){
   char *ptr = (char *)line;
   *size = 0;
+  while(char_in(*(++ptr), WHITE_SPACE));
   args[(*size)++] = ptr;
   while(*(++ptr)){
     if(char_in(*ptr, WHITE_SPACE)){
+      *ptr = '\0';
+      while(char_in(*(++ptr), WHITE_SPACE));
       if(!*(ptr + 1)){
-	break;
+        break; 
       }
-      args[(*size)++] = ++ptr;
+      args[(*size)++] = ptr;
       *(ptr - 1) = '\0';
     }
   }
