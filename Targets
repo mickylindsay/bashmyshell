@@ -1,4 +1,5 @@
 test:test.o
 yes:yes.o
 xargs:xargs.o
+wc:wc.o list.o
 clear:clear.o
