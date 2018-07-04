@@ -1,23 +1,34 @@
 /*
-wc
+   Copyright (C) 2018 Brian Lindsay
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 Word count programming for the number of lines, bytes, characters, words, 
 and the max line length.
  */
-
-#define LICENSE "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/license/gpl.html>.\n" \
-  "This is free software: you are free to change and redistriute it.\n" \
-  "There is NO WARRANTY, to the extent permitted by law.\n"
-
-#define PACKAGE_NAME "bashmyshell"
-#define PROGRAM_NAME "wc"
-#define VERSION "0.1"
-#define AUTHORS "Brian Lindsay"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "list.h"
+#include "usage.h"
+
+#define PACKAGE_NAME "bashmyshell"
+#define PROGRAM_NAME "wc"
+#define VERSION "0.1"
+#define AUTHORS "Brian Lindsay"
 
 #define LINE 0x01
 #define WORD 0x02
@@ -43,13 +54,7 @@ struct counter{
 char cur_mode;
 struct counter *total;
 
-static void usage_error(const char *op){
-  printf("%s: invalid option '%s'\n", PROGRAM_NAME, op);
-  printf("Try '%s --help' for more information.\n", PROGRAM_NAME);
-  exit(2);
-}
-
-static void print_help(){
+void print_help(){
   printf("Usage: %s [OPTION]... [FILE]...\n", PROGRAM_NAME);
   printf("Counts and outputs the number of lines, words, bytes for the provided FILE paths or stdin.\n\n");
   printf("When no files are provided stdin is read from.\n\n");
@@ -65,7 +70,7 @@ static void print_help(){
   exit(1);
 }
 
-static void print_version(){
+void print_version(){
   printf("%s (%s) %s\n", PROGRAM_NAME, PACKAGE_NAME, VERSION);
   printf("%s\n", LICENSE);
   printf("Written by %s\n", AUTHORS);
@@ -173,11 +178,11 @@ int main(int argc, char **argv){
 	}else if(!strcmp("--version", argv[i])){
 	  print_version();
 	}else{
-	  usage_error(argv[i]);
+	  USAGE(argv[i]);
 	}
 	break;
       default:
-	usage_error(argv[i]);
+	USAGE(argv[i]);
       }
     }else{
       //Attempt to read the given file and add it to a list of FILE
