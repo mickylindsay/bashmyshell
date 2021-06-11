@@ -22,7 +22,7 @@ Prints the effective user
 
 #define PACKAGE_NAME "bashmyshell"
 #define PROGRAM_NAME "whoami"
-#define VERSION "0.2"
+#define VERSION "0.2.1"
 #define AUTHORS "Micky Lindsay"
 
 // v0.2 No longer uses geteuid or getpwuid.
@@ -43,24 +43,24 @@ int main(void){
     int num_colon = 0;
     // Step through passwd file line until past second colon ':'
     while (num_colon < 2)
-      if ((i++)[0] == ':') num_colon++;
+      if (*(i++) == ':') num_colon++;
 
     // Walk through effective uid and uid in passwd file
-    while (j[0] == i[0]) {
+    while (*j == *i) {
       j++;
       i++;
     }
 
     // If passwd file has reach a colon AND uid string is null byte,
     // found effective user line
-    if (j[0] == 0 && i[0] == ':') break;
+    if (*j == 0 && *i == ':') break;
   }
 
   // Print current user character by character,
   // because I cant be fucked writting a clever substring
   char *c = buffer;
-  while (c[0] != ':') {
-    printf("%c", (c++)[0]);
+  while (*c != ':') {
+    printf("%c", *(c++));
   }
   printf("\n");
   // puts(getpwuid(id)->pw_name);
