@@ -4,3 +4,4 @@ xargs:xargs.o
 wc:wc.o list.o
 clear:clear.o
 whoami:whoami.o
+curl:curl.o
